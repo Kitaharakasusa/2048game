@@ -2,10 +2,29 @@ let board = new Array();
 let score = 0;
 let hasConflicted = new Array();
 
+let starx = 0,endx =0, starty = 0, endy =0;
+
 $(document).ready(function () {
+    prepareForMobile();
    newgame(); 
 });
 
+function  prepareForMobile() {
+    if (documentWidth > 500) {
+        gridContainerWidth = 500;
+        cellSideLength = 100;
+        cellSapce = 20;
+    }
+    $('#grid-container').css('width', gridContainerWidth - 2*cellSapce);
+    $('#grid-container').css('height', gridContainerWidth - 2*cellSapce);
+    $('#grid-container').css('padding',cellSapce);
+    $('#grid-container').css('border-radius', 0.02 * gridContainerWidth);
+
+    $('.grid-cell').css('width', cellSideLength);
+    $('.grid-cell').css('height', cellSideLength);
+    $('.grid-cell').css('border-radius',0.02 * cellSideLength);
+
+}
 function newgame() {
      //初始化棋盘格
     init();
@@ -44,12 +63,12 @@ function updateBoardView() {
             if (board [i][j] === 0) {
                 theNumberCell.css('width','0px');
                 theNumberCell.css('height','0px');
-                theNumberCell.css('top',getPosTop(i,j) + 50);
-                theNumberCell.css('left',getPosLeft(i,j) + 50);
+                theNumberCell.css('top',getPosTop(i,j) + cellSapce /2);
+                theNumberCell.css('left',getPosLeft(i,j) + cellSapce /2);
 
             } else {
-                theNumberCell.css('width','100px');
-                theNumberCell.css('height','100px');
+                theNumberCell.css('width', cellSideLength);
+                theNumberCell.css('height',cellSideLength);
                 theNumberCell.css('top',getPosTop(i,j));
                 theNumberCell.css('left',getPosLeft(i,j));
 
@@ -60,6 +79,9 @@ function updateBoardView() {
             }
             hasConflicted[i][j] = false;
         }
+        $('.number-cell').css('line-height' ,cellSideLength + 'px');
+        $('.number-cell').css('font-size' ,0.6*cellSideLength + 'px')
+
 
 }
 function generateOneNumber() {
@@ -102,24 +124,32 @@ function generateOneNumber() {
 $(document).keydown(function (event) {
    switch (event.keyCode) {
        case 37:
+           event.preventDefault();
+
            if(moveLeft()){
                setTimeout("generateOneNumber()",210);
                setTimeout("isGameOver()",300);
            }
            break;
        case 38:
+           event.preventDefault();
+
            if(moveUp()){
                setTimeout("generateOneNumber()",210);
                setTimeout("isGameOver()",300);
            }
            break;
        case 39:
+           event.preventDefault();
+
            if(moveRight()){
                setTimeout("generateOneNumber()",210);
                setTimeout("isGameOver()",300);
            }
            break;
        case 40:
+           event.preventDefault();
+
            if(moveDown()){
                setTimeout("generateOneNumber()",210);
                setTimeout("isGameOver()",300);
@@ -255,6 +285,52 @@ function moveDown() {
     return true;
 }
 
+document.addEventListener('touchstart',function (event) {
+   starx =  event.touches[0].pageX;
+   starty = event.touches[0].pageY;
+
+});
+document.addEventListener('touchmove',function (event) {
+    event.preventDefault();
+});
+document.addEventListener('touchend', function (event) {
+    endx = event.changedTouches[0].pageX;
+    endy = event.changedTouches[0].pageY;
+
+
+    let deltax = endx - starx;
+    let deltay = endy - starty;
+    if (Math.abs(deltax) < 0.3 * documentWidth && Math.abs(deltay) < 0.3*documentWidth)
+        return;
+    if(Math.abs(deltax) >= Math.abs(deltay)) {
+        if (deltax > 0){
+            if(moveRight()){
+                setTimeout("generateOneNumber()",210);
+                setTimeout("isGameOver()",300);
+            }
+        }else {
+            if(moveLeft()){
+                setTimeout("generateOneNumber()",210);
+                setTimeout("isGameOver()",300);
+            }
+        }
+    }
+    else {
+        if (deltay > 0) {
+            if(moveDown()){
+                setTimeout("generateOneNumber()",210);
+                setTimeout("isGameOver()",300);
+            }
+
+
+        }else {
+            if(moveUp()){
+                setTimeout("generateOneNumber()",210);
+                setTimeout("isGameOver()",300);
+            }
+        }
+    }
+});
 function isGameOver() {
     if (nospace(board) && nomove(board)){
       gameOver();
